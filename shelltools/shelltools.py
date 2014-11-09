@@ -52,7 +52,14 @@ class FileSystem(object):
         
     def delete(self):
         os.remove(self.path)
-    
+        
+    def name(self):
+        return os.path.basename(self.path)
+        
+    def filter(self, pat):
+        match = fnmatch.fnmatch(self.name(), pat)
+        print self.path
+        return match
 
 
 class FileSystemList(object):
@@ -80,8 +87,12 @@ class FileSystemList(object):
             size += i.size()
         return size
             
-    def filter(self): # Todo: probably only useful for the FileSystemList class 
-        pass
+    def filter(self, pat): # Todo: probably only useful for the FileSystemList class 
+        filtered = FileSystemList()
+        for i in self.list:
+            if i.filter(pat):
+                filtered.append(i)
+        return filtered
         
 def findstr(string, path):
     """
@@ -127,8 +138,9 @@ def find(locations, filters, recursive=False):
     for filename in all_files:
         for pattern in filters:
             if fnmatch.fnmatch(os.path.basename(filename), pattern):
-                #print "Found match: %s" % filename
-                matches.append(FileSystem(filename))
+                fobj = FileSystem(filename)
+                matches.append(fobj)
+                print "Found match: %s" % fobj
                 
     return matches
 
@@ -251,5 +263,6 @@ def delolder(path, ndays):
 
         
 if __name__ == '__main__':
-    findstr('document','c:/users/jay/desktop/python-shelltools/')
+    print 'This is the shelltools module'
+
             
