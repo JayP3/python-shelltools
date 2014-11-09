@@ -12,7 +12,77 @@ import os
 import shutil
 import datetime
 
+class FileSystem(object):
+    def __init__(self, path):
+        self.stat = os.stat(path)
+        self.path = path
+        
+    def __str__(self):
+        return self.path
+    def __repr__(self):
+        return self.path
+    # TODO: turn these stat results into stat objects so we can do things like 
+    # FileSystem.size().toMB or toGB, or toKB etc
+    def size(self):
+        return self.stat.st_size
+    
+    def ctime(self):
+        return self.stat.st_ctime
+    
+    def mtime(self):
+        return self.stat.st_mtime
+    
+    def atime(self):
+        return self.stat.st_atime
+        
+    def is_olderthan(self):
+        pass
+    
+    def is_newerthan(self):
+        pass
+    
+    def is_smallerthan(self):
+        pass
+    
+    def move(self, dst):
+        shutil.move(self.path, dst)
+    
+    def copy(self, dst):
+        shutil.copy2(self.path, dst)
+        
+    def delete(self):
+        os.remove(self.path)
+    
 
+
+class FileSystemList(object):
+    def __init__(self):
+        self.list = []
+        
+    def append(self, fsobj):
+        self.list.append(fsobj)
+        
+    def move(self, dst):
+        for i in self.list:
+            i.move(i.path, dst)
+            
+    def copy(self, dst):
+        for i in self.list:
+            i.copy(i.path, dst)
+
+    def delete(self):
+        for i in self.list:
+            i.delete()
+    
+    def get_size(self):
+        size = 0
+        for i in self.list:
+            size += i.size()
+        return size
+            
+    def filter(self): # Todo: probably only useful for the FileSystemList class 
+        pass
+        
 def findstr(string, path):
     """
     Find a string in a file.
@@ -20,10 +90,7 @@ def findstr(string, path):
     matches = []
     for root, dirs, files in os.walk(path):
         for fname in files:
-            if fname.endswith('.py'):
-                f = open(os.path.join(root, fname), 'r')
-            else:
-                continue
+            f = open(os.path.join(root, fname), 'r')
             content = f.readline()
             while content != '':
                 if string in content:
@@ -42,7 +109,7 @@ def find(locations, filters, recursive=False):
     Returns: A list of filepaths.
     """
     all_files = []
-    matches = []
+    matches = FileSystemList()
     for location in locations:
         contents = []
         if recursive == True:
@@ -61,7 +128,7 @@ def find(locations, filters, recursive=False):
         for pattern in filters:
             if fnmatch.fnmatch(os.path.basename(filename), pattern):
                 #print "Found match: %s" % filename
-                matches.append(filename)
+                matches.append(FileSystem(filename))
                 
     return matches
 
@@ -184,5 +251,5 @@ def delolder(path, ndays):
 
         
 if __name__ == '__main__':
-    pass
+    findstr('document','c:/users/jay/desktop/python-shelltools/')
             
