@@ -19,8 +19,14 @@ class FileSystem(object):
         
     def __str__(self):
         return self.path
+    
     def __repr__(self):
         return self.path
+    
+    def _timedelta(self):
+        today = datetime.date.today()
+        filedate = datetime.date.fromtimestamp(self.mtime())
+        return (today - filedate)
     # TODO: turn these stat results into stat objects so we can do things like 
     # FileSystem.size().toMB or toGB, or toKB etc
     def size(self):
@@ -35,11 +41,18 @@ class FileSystem(object):
     def atime(self):
         return self.stat.st_atime
         
-    def is_olderthan(self):
-        pass
+    def is_olderthan(self, ndays):
+        if self._timedelta().days > ndays:
+            return True
+        else:
+            return False
+        
     
-    def is_newerthan(self):
-        pass
+    def is_newerthan(self, ndays):
+        if self._timedelta().days < ndays:
+            return True
+        else:
+            return False
     
     def is_smallerthan(self):
         pass
