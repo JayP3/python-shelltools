@@ -56,9 +56,12 @@ class FileSystem(object):
     def name(self):
         return os.path.basename(self.path)
         
-    def filter(self, pat):
-        match = fnmatch.fnmatch(self.name(), pat)
-        print self.path
+    def filter(self, patterns):
+        for pattern in patterns_to_list(patterns):
+            match = fnmatch.fnmatch(self.name(), pattern)
+            if match:
+                print self.name()
+                return match
         return match
 
 
@@ -124,15 +127,17 @@ def findstr(string, path):
             f.close()
 
 
-def find(locations, filters, recursive=False):
+def find(locations=os.getcwd(),  patterns='*', recursive=False):
     """
     A general file search function
     By default, returns all files in given locations and ignores subfolders.
-    Returns: A list of filepaths.
+    
+    Returns:
+        A list of filepaths.
     """
     all_files = []
     matches = FileSystemList()
-    for location in locations:
+    for location in patterns_to_list(locations):
         contents = []
         if recursive == True:
             for root, dirs, files in os.walk(location):
@@ -145,9 +150,10 @@ def find(locations, filters, recursive=False):
             except WindowsError as e:
                 print e
         all_files.extend(contents)
-        
+    
+    patterns = patterns_to_list(patterns)    
     for filename in all_files:
-        for pattern in filters:
+        for pattern in patterns:
             if fnmatch.fnmatch(os.path.basename(filename), pattern):
                 fobj = FileSystem(filename)
                 matches.append(fobj)
