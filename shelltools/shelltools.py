@@ -94,6 +94,17 @@ class FileSystemList(object):
                 filtered.append(i)
         return filtered
         
+def patterns_to_list(patterns):
+    '''
+    Take a semicolon delimited list of patterns,
+    If patterns is a string, split it up and return a list.
+    If patterns is another type of sequence, return patterns unchanged.
+    '''
+    try:
+        return [pattern.strip() for pattern in patterns.split(';')]
+    except AttributeError:
+        return patterns
+        
 def findstr(string, path):
     """
     Find a string in a file.
